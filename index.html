@@ -660,150 +660,98 @@ canvas { width: 100% !important; display: block; }
   function drawOrganicChart() {
     const canvas = document.getElementById('organicCanvas');
     if (!canvas) return;
+
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.round(rect.width * dpr);
     canvas.height = Math.round(rect.height * dpr);
+
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
+
     const W = rect.width, H = rect.height;
-    const isMobile = W < 520;
-    const padL = isMobile ? 68 : 78;
-    const padR = isMobile ? 32 : 36;
-    const padT = isMobile ? 72 : 82;
-    const padB = isMobile ? 56 : 62;
+    const padL = W < 600 ? 68 : 78;
+    const padR = 32;
+    const padT = W < 600 ? 72 : 82;
+    const padB = 58;
+
     const chartW = W - padL - padR;
     const chartH = H - padT - padB;
 
-    const revenue = [12000,20000,32000,44000,56000,68000];
-    const expenses = [1224,1224,1224,1224,1224,1224];
+    const revenue = [12000, 20000, 32000, 44000, 56000, 68000];
+    const expenses = [1224, 1224, 1224, 1224, 1224, 1224];
     const maxVal = 85000;
 
     const toY = v => padT + chartH - (v / maxVal * chartH);
     const toX = i => padL + (i / 5) * chartW;
 
-    // Grid lines + Y labels
-    [0,20000,40000,60000,80000].forEach(v => {
+    // Grid + Y labels
+    [0, 20000, 40000, 60000, 80000].forEach(v => {
       const y = toY(v);
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
-      ctx.fillStyle = 'rgba(246,246,246,0.4)';
-      ctx.font = (isMobile ? '9.5' : '11') + 'px "DM Sans",sans-serif';
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+
+      ctx.fillStyle = 'rgba(246,246,246,0.45)';
+      ctx.font = (W < 600 ? '10' : '11.5') + 'px "DM Sans",sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText('$' + (v/1000) + 'k', padL-10, y+4);
+      ctx.fillText('$' + (v/1000) + 'k', padL - 10, y + 4);
     });
 
     // Revenue line
+    ctx.strokeStyle = '#5B66F8';
+    ctx.lineWidth = 3.5;
     ctx.beginPath();
     ctx.moveTo(toX(0), toY(revenue[0]));
-    for (let i = 1; i < 6; i++) ctx.lineTo(toX(i), toY(revenue[i]));
-    ctx.strokeStyle = '#5B66F8'; ctx.lineWidth = 3; ctx.stroke();
+    for (let i = 1; i < revenue.length; i++) ctx.lineTo(toX(i), toY(revenue[i]));
+    ctx.stroke();
 
     // Expenses line
+    ctx.strokeStyle = '#5FD7FC';
+    ctx.lineWidth = 2.8;
     ctx.beginPath();
     ctx.moveTo(toX(0), toY(expenses[0]));
-    for (let i = 1; i < 6; i++) ctx.lineTo(toX(i), toY(expenses[i]));
-    ctx.strokeStyle = '#5FD7FC'; ctx.lineWidth = 2.5; ctx.stroke();
+    for (let i = 1; i < expenses.length; i++) ctx.lineTo(toX(i), toY(expenses[i]));
+    ctx.stroke();
 
-    // Data points + labels (with better vertical spacing)
+    // Data points + labels
     revenue.forEach((v, i) => {
       const x = toX(i), y = toY(v);
-      ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2); ctx.fillStyle = '#5B66F8'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI*2); ctx.fillStyle = '#5B66F8'; ctx.fill();
       ctx.fillStyle = '#5B66F8';
-      ctx.font = (isMobile ? '10.5' : '13') + 'px "DM Sans",sans-serif';
+      ctx.font = (W < 600 ? '11' : '13') + 'px "DM Sans",sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('$' + (v/1000) + 'k', x, y - 15);
+      ctx.fillText('$' + (v/1000) + 'k', x, y - 16);
     });
 
-    // Legend (properly spaced)
-    const lx = padL + 6;
+    // Legend (clean position above chart)
+    const lx = padL + 8;
     const ly = padT - 26;
-    ctx.fillStyle = '#5B66F8'; ctx.beginPath(); ctx.arc(lx+8, ly+7, 5.5, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = 'rgba(246,246,246,0.9)'; ctx.font = '12.5px "DM Sans",sans-serif';
-    ctx.fillText('Projected Revenue', lx+22, ly+12);
-
-    ctx.fillStyle = '#5FD7FC'; ctx.beginPath(); ctx.arc(lx+185, ly+7, 5.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#5B66F8'; ctx.beginPath(); ctx.arc(lx + 8, ly + 7, 6, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = 'rgba(246,246,246,0.9)';
-    ctx.fillText('Scale Expenses', lx+199, ly+12);
-  }
+    ctx.font = '13px "DM Sans",sans-serif';
+    ctx.fillText('Projected Revenue', lx + 24, ly + 12);
 
-  function drawProofChart() {
-    const canvas = document.getElementById('proofCanvas');
-    if (!canvas) return;
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.round(rect.width * dpr);
-    canvas.height = Math.round(rect.height * dpr);
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-    const W = rect.width, H = rect.height;
-    const isMobile = W < 520;
-    const padL = isMobile ? 58 : 68;
-    const padR = isMobile ? 24 : 28;
-    const padT = isMobile ? 48 : 56;
-    const padB = isMobile ? 42 : 48;
-    const chartW = W - padL - padR;
-    const chartH = H - padT - padB;
-
-    const caseA = [100000, 180000, 280000, 420000, 580000, 750000]; // Patty B. 5.3x
-    const caseB = [120000, 210000, 320000, 450000, 620000, 820000]; // Leo J. 4.1x
-    const caseC = [95000, 175000, 275000, 410000, 560000, 720000];  // Jessica S. 5.0x
-    const maxVal = 900000;
-
-    const toY = v => padT + chartH - (v / maxVal * chartH);
-    const toX = i => padL + (i / 5) * chartW;
-
-    // Grid
-    [0,200000,400000,600000,800000].forEach(v => {
-      const y = toY(v);
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
-    });
-
-    // Case A (Patty B.)
-    ctx.beginPath(); ctx.moveTo(toX(0), toY(caseA[0]));
-    for (let i = 1; i < 6; i++) ctx.lineTo(toX(i), toY(caseA[i]));
-    ctx.strokeStyle = '#5B66F8'; ctx.lineWidth = 2.5; ctx.stroke();
-
-    // Case B (Leo J.)
-    ctx.beginPath(); ctx.moveTo(toX(0), toY(caseB[0]));
-    for (let i = 1; i < 6; i++) ctx.lineTo(toX(i), toY(caseB[i]));
-    ctx.strokeStyle = '#5FD7FC'; ctx.lineWidth = 2.5; ctx.stroke();
-
-    // Case C (Jessica S.)
-    ctx.beginPath(); ctx.moveTo(toX(0), toY(caseC[0]));
-    for (let i = 1; i < 6; i++) ctx.lineTo(toX(i), toY(caseC[i]));
-    ctx.strokeStyle = '#F366FC'; ctx.lineWidth = 2.5; ctx.stroke();
-
-    // Points
-    [caseA, caseB, caseC].forEach((arr, idx) => {
-      const color = ['#5B66F8', '#5FD7FC', '#F366FC'][idx];
-      arr.forEach((v, i) => {
-        const x = toX(i), y = toY(v);
-        ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
-      });
-    });
+    ctx.fillStyle = '#5FD7FC'; ctx.beginPath(); ctx.arc(lx + 190, ly + 7, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillText('Scale Expenses', lx + 206, ly + 12);
   }
 
   function drawAll() {
     drawOrganicChart();
-    drawProofChart();
   }
 
   if (document.readyState === 'complete') drawAll();
   else window.addEventListener('load', drawAll);
-  setTimeout(drawAll, 350);
 
-  // Resize handling
+  setTimeout(drawAll, 400);
+
+  // Resize handler
   if (typeof ResizeObserver !== 'undefined') {
     const ro = new ResizeObserver(() => {
       clearTimeout(window.__chartTimer);
-      window.__chartTimer = setTimeout(drawAll, 100);
+      window.__chartTimer = setTimeout(drawAll, 120);
     });
-    const organic = document.getElementById('organicCanvas');
-    const proof = document.getElementById('proofCanvas');
-    if (organic && organic.parentElement) ro.observe(organic.parentElement);
-    if (proof && proof.parentElement) ro.observe(proof.parentElement);
+    const c = document.getElementById('organicCanvas');
+    if (c && c.parentElement) ro.observe(c.parentElement);
   } else {
     window.addEventListener('resize', () => {
       clearTimeout(window.__chartTimer);
