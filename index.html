@@ -667,9 +667,13 @@ canvas { width: 100% !important; display: block; }
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
     const W = rect.width, H = rect.height;
-    const isMobile = W < 480;
-    const padL = isMobile ? 58 : 68, padR = 24, padT = isMobile ? 58 : 72, padB = isMobile ? 48 : 58;
-    const chartW = W - padL - padR, chartH = H - padT - padB;
+    const isMobile = W < 500;
+    const padL = isMobile ? 62 : 72;
+    const padR = isMobile ? 28 : 32;
+    const padT = isMobile ? 68 : 78;
+    const padB = isMobile ? 52 : 58;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
 
     const revenue = [12000,20000,32000,44000,56000,68000];
     const expenses = [1224,1224,1224,1224,1224,1224];
@@ -683,71 +687,62 @@ canvas { width: 100% !important; display: block; }
       const y = toY(v);
       ctx.strokeStyle = 'rgba(255,255,255,0.07)';
       ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
-      ctx.fillStyle = 'rgba(246,246,246,0.3)';
-      ctx.font = (isMobile ? '9' : '11') + 'px "DM Sans",sans-serif';
+      ctx.fillStyle = 'rgba(246,246,246,0.35)';
+      ctx.font = (isMobile ? '9.5' : '11') + 'px "DM Sans",sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText('$' + (v/1000) + 'k', padL-5, y+4);
+      ctx.fillText('$' + (v/1000) + 'k', padL-8, y+4);
     });
 
     // Revenue line
     ctx.beginPath();
     ctx.moveTo(toX(0), toY(revenue[0]));
     for (let i = 1; i < 6; i++) ctx.lineTo(toX(i), toY(revenue[i]));
-    ctx.strokeStyle = '#5B66F8'; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.strokeStyle = '#5B66F8'; ctx.lineWidth = 3; ctx.stroke();
 
     // Expenses line
     ctx.beginPath();
     ctx.moveTo(toX(0), toY(expenses[0]));
     for (let i = 1; i < 6; i++) ctx.lineTo(toX(i), toY(expenses[i]));
-    ctx.strokeStyle = '#5FD7FC'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.strokeStyle = '#5FD7FC'; ctx.lineWidth = 2.5; ctx.stroke();
 
-    // Points and labels
+    // Data points + labels
     revenue.forEach((v, i) => {
       const x = toX(i), y = toY(v);
-      ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI*2); ctx.fillStyle = '#5B66F8'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2); ctx.fillStyle = '#5B66F8'; ctx.fill();
       ctx.fillStyle = '#5B66F8';
-      ctx.font = (isMobile ? '10' : '13') + 'px "DM Sans",sans-serif';
+      ctx.font = (isMobile ? '10.5' : '13') + 'px "DM Sans",sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('$' + (v/1000) + 'k', x, y - 11);
+      ctx.fillText('$' + (v/1000) + 'k', x, y - 14);
     });
 
     // Legend
-    if (!isMobile) {
-      const lx = padL + 6;
-      const ly = padT - 18;
-      ctx.fillStyle = '#5B66F8'; ctx.beginPath(); ctx.arc(lx+7, ly+7, 5, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = 'rgba(246,246,246,0.75)'; ctx.font = '12px "DM Sans",sans-serif';
-      ctx.fillText('Projected Revenue', lx+18, ly+12);
-      ctx.fillStyle = '#5FD7FC'; ctx.beginPath(); ctx.arc(lx+158, ly+7, 5, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = 'rgba(246,246,246,0.75)';
-      ctx.fillText('Scale Expenses', lx+169, ly+12);
-    }
+    const lx = padL + 4;
+    const ly = padT - 22;
+    ctx.fillStyle = '#5B66F8'; ctx.beginPath(); ctx.arc(lx+8, ly+7, 5.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(246,246,246,0.85)'; ctx.font = '12.5px "DM Sans",sans-serif';
+    ctx.fillText('Projected Revenue', lx+22, ly+12);
+
+    ctx.fillStyle = '#5FD7FC'; ctx.beginPath(); ctx.arc(lx+178, ly+7, 5.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(246,246,246,0.85)';
+    ctx.fillText('Scale Expenses', lx+192, ly+12);
   }
 
   function drawAll() {
     drawOrganicChart();
   }
 
-  if (document.readyState === 'complete') {
-    drawAll();
-  } else {
-    window.addEventListener('load', drawAll);
-  }
-  setTimeout(drawAll, 350);
+  if (document.readyState === 'complete') drawAll();
+  else window.addEventListener('load', drawAll);
 
-  // Resize handling
+  setTimeout(drawAll, 300);
+
+  // Resize
   if (typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(() => {
-      clearTimeout(window.__chartTimer);
-      window.__chartTimer = setTimeout(drawAll, 80);
-    });
+    const ro = new ResizeObserver(() => { clearTimeout(window.__chartTimer); window.__chartTimer = setTimeout(drawAll, 100); });
     const organic = document.getElementById('organicCanvas');
-    if (organic) ro.observe(organic.parentElement);
+    if (organic && organic.parentElement) ro.observe(organic.parentElement);
   } else {
-    window.addEventListener('resize', () => {
-      clearTimeout(window.__chartTimer);
-      window.__chartTimer = setTimeout(drawAll, 100);
-    });
+    window.addEventListener('resize', () => { clearTimeout(window.__chartTimer); window.__chartTimer = setTimeout(drawAll, 150); });
   }
 })();
 </script>
